@@ -1,0 +1,228 @@
+﻿#include <iostream>
+#include <sstream>
+#include <string>
+#include <cstring> 
+#include "jsoncpp/json.h"
+using namespace std;
+
+// 注意黑方为0号玩家
+int currBotColor; // 正在等待输出结果的BOT
+int gridInfo[9][9] = { 0 }; // 先x后y
+int blackPieceCount = 0, whitePieceCount = 0;
+string blackName = "", whiteName = "";
+
+bool dfs_air_visit[9][9];
+const int cx[] = { -1,0,1,0 };
+const int cy[] = { 0,-1,0,1 };
+
+bool inBorder(int x, int y) { return x >= 0 && y >= 0 && x<9 && y<9; }
+
+//true: has air
+bool dfs_air(int fx, int fy)
+{
+	dfs_air_visit[fx][fy] = true;
+	bool flag = false;
+	for (int dir = 0; dir < 4; dir++)
+	{
+		int dx = fx + cx[dir], dy = fy + cy[dir];
+		if (inBorder(dx, dy))
+		{
+			if (gridInfo[dx][dy] == 0)
+				flag = true;
+			if (gridInfo[dx][dy] == gridInfo[fx][fy] && !dfs_air_visit[dx][dy])
+				if (dfs_air(dx, dy))
+					flag = true;
+		}
+	}
+	return flag;
+}
+
+//true: available
+bool judgeAvailable(int fx, int fy, int col)
+{
+	gridInfo[fx][fy] = col;
+	memset(dfs_air_visit, 0, sizeof(dfs_air_visit));
+	if (!dfs_air(fx, fy))
+	{
+		gridInfo[fx][fy] = 0;
+		return false;
+	}
+	for (int dir = 0; dir < 4; dir++)
+	{
+		int dx = fx + cx[dir], dy = fy + cy[dir];
+		if (inBorder(dx, dy))
+		{
+			if (gridInfo[dx][dy] && !dfs_air_visit[dx][dy])
+				if (!dfs_air(dx, dy))
+				{
+					gridInfo[fx][fy] = 0;
+					return false;
+				}
+		}
+	}
+	gridInfo[fx][fy] = 0;
+	return true;
+}
+
+//true: game end
+int CheckIfHasValidMove(int col)
+{
+	for (int i = 0; i < 9; i++)
+		for (int j = 0; j < 9; j++)
+			if (gridInfo[i][j] == 0 && judgeAvailable(i, j, col))
+				return false;
+	return true;
+}
+
+bool ProcStep(int x, int y, int color, bool checkOnly = false)
+{
+	if (!inBorder(x, y) || gridInfo[x][y])
+		return false;
+	if (!judgeAvailable(x, y, color))
+		return false;
+	if (!checkOnly)
+		gridInfo[x][y] = color;
+	return true;
+}
+
+int main()
+{
+	string str;
+	getline(cin, str);
+	Json::Reader reader;
+	Json::Value input, output;
+	reader.parse(str, input);
+	input = input["log"];
+
+	currBotColor = 1; // 先手为黑
+	if (input.size() == 0)
+	{
+		output["display"] = "";
+		output["command"] = "request";
+		output["content"]["0"]["x"] = -1;
+		output["content"]["0"]["y"] = -1;
+	}
+	else
+	{
+		for (int i = 1; i < input.size(); i += 2)
+		{
+			bool isLast = i == input.size() - 1;
+			Json::Value content;
+			Json::Value display;
+			if (currBotColor == 1) // 0号玩家 / 黑方
+			{
+				Json::Value answer = input[i]["0"]["response"].isNull() ? input[i]["0"]["content"] : input[i]["0"]["response"];
+				if (((answer.isString() &&
+					reader.parse(answer.asString(), content)) ||
+					(answer.isObject() &&
+					(content = answer, true))) &&
+					content["x"].isInt() && content["y"].isInt()) // 保证输入格式正确
+				{
+					int currX = content["x"].asInt();
+					int currY = content["y"].asInt();
+					if (!ProcStep(currX, currY, currBotColor) && isLast) // 不合法棋步！
+					{
+						stringstream ss;
+						ss << "INVALID_MOVE  (" << currX << "," << currY << ")";
+						if (inBorder(currX, currY) && gridInfo[currX][currY])
+							ss << " is not empty";
+						else
+							ss << " is forbidden position";
+						string s; getline(ss, s);
+						output["display"]["err"] = s;
+						output["display"]["winner"] = 1;
+						output["command"] = "finish"; // 判输
+						output["content"]["0"] = 0;
+						output["content"]["1"] = 1;
+					}
+					else if (isLast) // 正常棋步
+					{
+						output["display"]["x"] = currX;
+						output["display"]["y"] = currY;
+						output["display"]["color"] = 0;
+						if (CheckIfHasValidMove(-currBotColor)) // 游戏结束
+						{
+							output["display"]["winner"] = 0;
+							output["command"] = "finish";
+							output["content"]["0"] = 1;
+							output["content"]["1"] = 0;
+						}
+						else
+						{
+							output["command"] = "request";
+							output["content"]["1"]["x"] = currX;
+							output["content"]["1"]["y"] = currY;
+						}
+					}
+				}
+				else if (isLast)
+				{
+					output["display"]["err"] = "INVALID_INPUT_VERDICT_" + input[i]["0"]["verdict"].asString();
+					output["display"]["winner"] = 1;
+					output["command"] = "finish"; // 判输
+					output["content"]["0"] = 0;
+					output["content"]["1"] = 1;
+				}
+			}
+			else
+			{
+				Json::Value answer = input[i]["1"]["response"].isNull() ? input[i]["1"]["content"] : input[i]["1"]["response"];
+				if (((answer.isString() &&
+					reader.parse(answer.asString(), content)) ||
+					(answer.isObject() &&
+					(content = answer, true))) &&
+					content["x"].isInt() && content["y"].isInt()) // 保证输入格式正确
+				{
+					int currX = content["x"].asInt();
+					int currY = content["y"].asInt();
+					if (!ProcStep(currX, currY, currBotColor) && isLast) // 不合法棋步！
+					{
+						stringstream ss;
+						ss << "INVALID_MOVE  (" << currX << "," << currY << ")";
+						if (inBorder(currX, currY) && gridInfo[currX][currY])
+							ss << " is not empty";
+						else
+							ss << " is forbidden position";
+						string s; getline(ss, s);
+						output["display"]["err"] = s;
+						output["display"]["winner"] = 0;
+						output["command"] = "finish"; // 判输
+						output["content"]["0"] = 1;
+						output["content"]["1"] = 0;
+					}
+					else if (isLast) // 正常棋步
+					{
+						output["display"]["x"] = currX;
+						output["display"]["y"] = currY;
+						output["display"]["color"] = 1;
+						if (CheckIfHasValidMove(-currBotColor)) // 游戏结束
+						{
+							output["display"]["winner"] = 1;
+							output["command"] = "finish";
+							output["content"]["0"] = 0;
+							output["content"]["1"] = 1;
+						}
+						else
+						{
+							output["command"] = "request";
+							output["content"]["0"]["x"] = currX;
+							output["content"]["0"]["y"] = currY;
+						}
+					}
+				}
+				else if (isLast)
+				{
+					output["display"]["err"] = "INVALID_INPUT_VERDICT_" + input[i]["1"]["verdict"].asString();
+					output["display"]["winner"] = 0;
+					output["command"] = "finish"; // 判输
+					output["content"]["0"] = 1;
+					output["content"]["1"] = 0;
+				}
+			}
+			currBotColor *= -1;
+		}
+	}
+	Json::FastWriter writer;
+	cout << writer.write(output) << endl;
+	return 0;
+}

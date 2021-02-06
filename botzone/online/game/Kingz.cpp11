@@ -1,0 +1,373 @@
+/*
+display={
+	"count" :[length 100 array people count per cell],
+	"type"  :[length 100 array type per cell (-1 obstacle, 0 empty, 1 fortress, 2 base)],
+   "belong":[length 100 array per cell which part the cell belongs: 0 neutral, 1 belongs to red, 2 belongs to blue],
+   "headquarter":[
+      [redHeadquarterX , redHeadquarterY],
+      [blueHeadquarterX,blueHeadquarterY],
+   ],
+   "status":stringStatus   "opening", "end", "combat",
+   "winner":numberWinner   0 for draw, 1 for red, 2 for blue,
+   "operation":[
+      [redX, redY, redW, redDire],
+      [blueX,blueY,blueW,blueDire]
+   ]
+}
+*/  
+
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <cstring>
+#include <cassert>
+#include "jsoncpp/json.h"
+#include <random> 
+#define ind Json::Value::ArrayIndex 
+using namespace std;
+
+int INIT; //真实大小 
+int currBotColor; // 正在等待输出结果的BOT
+int troop[10][10]={0},tr[3][10][10];
+int info[10][10]={0}; //-1障碍 0空地 1堡垒 2基地 
+int col[10][10]={0}; //0无, 1黑, 2白
+int dx[5]={-1,1,0,0,0},dy[5]={0,0,-1,1,0};
+string blackName = "", whiteName = "";
+default_random_engine e;
+int ran(int n){return e()%n;}
+void dfs(int x,int y)
+{
+	if ((x<0)||(x>=10)||(y<0)||(y>=10)||(info[x][y]!=0)) return;
+	info[x][y]=1;
+	dfs(x-1,y);dfs(x+1,y);dfs(x,y-1);dfs(x,y+1);
+}
+void gen()
+{
+	e.seed(std::random_device()());
+	loop:
+	for (int i=9;i>=5;i--)
+	for (int j=9;j>=0;j--)
+	{
+		int fr=6;
+		if ((i!=9)&&(j!=9)&&(info[i+1][j+1]==-1)) fr-=2;
+		if ((i!=9)&&(j!=0)&&(info[i+1][j-1]==-1)) fr-=2;
+		if ((i!=9)&&(info[i+1][j]==-1)) fr+=2;
+		if ((j!=9)&&(info[i][j+1]==-1)) fr+=2;
+		info[i][j]=info[9-i][9-j]=(ran(fr)==0)?-1:0;
+	}
+	if (INIT==10)
+	{
+	}
+	if (INIT==8)
+	{
+		for (int i=0;i<10;i++) info[i][0]=info[i][9]=info[0][i]=info[9][i]=-1;
+	}
+	else if (INIT==6)
+	{
+		for (int i=0;i<10;i++)
+		{
+			info[i][0]=info[i][9]=info[0][i]=info[9][i]=-1;
+			info[i][1]=info[i][8]=info[1][i]=info[8][i]=-1;
+		}
+	}
+	else if (INIT==4)
+	{
+		for (int i=0;i<10;i++)
+		{
+			info[i][0]=info[i][9]=info[0][i]=info[9][i]=-1;
+			info[i][1]=info[i][8]=info[1][i]=info[8][i]=-1;
+			info[i][2]=info[i][7]=info[2][i]=info[7][i]=-1;
+		}
+	}
+	int x=ran(10),y=ran(10);
+	dfs(x,y);
+	if ((info[x][y]==1)&&(info[9-x][9-y]==1)) {info[x][y]=2;info[9-x][9-y]=2;}
+	else goto loop;
+	for (int i=9;i>=5;i--)
+	for (int j=9;j>=0;j--) if (info[i][j]==1) info[i][j]=info[9-i][9-j]=(ran(10)==0);
+	
+	for (int i=0;i<10;i++)
+	for (int j=0;j<10;j++)
+	{
+		if (info[i][j]==2) {troop[i][j]=10;col[i][j]=(i<5)?1:2;}
+		else if (info[i][j]==1) troop[i][j]=troop[9-i][9-j]=ran(25)+ran(25)+ran(25)+ran(25)+5;
+		else if (info[i][j]==-1) troop[i][j]=-1;
+	}
+}
+void fight(int &x,int &y,int &z)
+{
+	int m=min(x,y);
+	x-=m;y-=m;
+	if (x>0)
+	{
+		m=min(x,z);
+		x-=m;z-=m;
+	}
+	else if (y>0)
+	{
+		m=min(y,z);
+		y-=m;z-=m;
+	}
+}
+int main()
+{
+	//freopen("input.txt","r",stdin);
+	string str;
+	getline(cin,str);
+	Json::Reader reader;
+	Json::Value input,output,gr;
+	reader.parse(str,input); 
+	if (input["initdata"].isInt()) INIT=input["initdata"].asInt();
+	if ((INIT!=4)&&(INIT!=6)&&(INIT!=8)) INIT=10;
+	input = input["log"];
+
+	if (input.size()==0)
+	{
+		gen();
+		output["command"] = "request";
+		for (int i=0;i<10;i++)
+		for (int j=0;j<10;j++)
+		{
+			output["content"]["0"][i*10+j]=troop[i][j];
+			output["content"]["1"][i*10+j]=troop[i][j];
+			if (col[i][j]==1) {output["content"]["0"][100]=i;output["content"]["0"][101]=j;}
+			if (col[i][j]==2) {output["content"]["1"][100]=i;output["content"]["1"][101]=j;}
+		}
+		//处理display 
+		for (int i=0;i<10;i++)
+		for (int j=0;j<10;j++)
+		{
+			output["display"]["count"][i*10+j]=max(troop[i][j],0);
+			int type;
+			if (troop[i][j]<0) type=-1;
+			else if (troop[i][j]==0) type=0;
+			else if (col[i][j]) type=2;
+			else type=1;
+			output["display"]["type"][i*10+j]=type;
+			output["display"]["belong"][i*10+j]=col[i][j];
+		}
+		output["display"]["status"]="opening";
+	}
+	else
+	{
+		gr=input[(ind)0]["output"]["content"];
+		for (int i=0;i<10;i++)
+		for (int j=0;j<10;j++)
+		{
+			troop[i][j]=gr["0"][i*10+j].asInt();
+			if (troop[i][j]==-1) info[i][j]=-1;
+			else if (troop[i][j]==0) info[i][j]=0;
+			else info[i][j]=1;
+		}
+		int bgx1=gr["0"][100].asInt(),bgy1=gr["0"][101].asInt();
+		col[bgx1][bgy1]=1;info[bgx1][bgy1]=2;
+		int bgx2=gr["1"][100].asInt(),bgy2=gr["1"][101].asInt();
+		col[bgx2][bgy2]=2;info[bgx2][bgy2]=2;
+		int round=0;bool err=false;
+		int x1,y1,w1,dir1,x2,y2,w2,dir2;
+		for (int i=1;i<input.size();i+=2)
+		{
+			//判断操作合法性 
+			bool isLast=(i==input.size()-1);round++;
+			Json::Value content;
+			Json::Value display;
+			Json::Value opt1,opt2;
+			opt1=input[i]["0"]["response"];
+			opt2=input[i]["1"]["response"];			
+			bool chk1=opt1[(ind)0].isInt()&&opt1[(ind)1].isInt()&&opt1[(ind)2].isInt()&&opt1[(ind)3].isInt();
+			bool chk2=opt2[(ind)0].isInt()&&opt2[(ind)1].isInt()&&opt2[(ind)2].isInt()&&opt2[(ind)3].isInt();
+			if ((!chk1)||(!chk2)) {err=true;goto finish;}
+			x1=opt1[(ind)0].asInt(),y1=opt1[(ind)1].asInt(),w1=opt1[(ind)2].asInt(),dir1=opt1[(ind)3].asInt();
+			if ((x1>=0)&&(x1<10)&&(y1>=0)&&(y1<10)&&(dir1>=0)&&(dir1<=4));else chk1=false; 
+			if ((chk1)&&((col[x1][y1]==1)&&(troop[x1][y1]>w1)&&(x1+dx[dir1]<10)&&(x1+dx[dir1]>=0)
+				&&(y1+dy[dir1]<10)&&(y1+dy[dir1]>=0)&&(info[x1+dx[dir1]][y1+dy[dir1]]!=-1)));else chk1=false;
+			
+				
+			x2=opt2[(ind)0].asInt(),y2=opt2[(ind)1].asInt(),w2=opt2[(ind)2].asInt(),dir2=opt2[(ind)3].asInt();
+			if ((x2>=0)&&(x2<10)&&(y2>=0)&&(y2<10)&&(dir2>=0)&&(dir2<=4));else chk2=false;
+			if ((chk2)&&((col[x2][y2]==2)&&(troop[x2][y2]>w2)&&(x2+dx[dir2]<10)&&(x2+dx[dir2]>=0)
+				&&(y2+dy[dir2]<10)&&(y2+dy[dir2]>=0)&&(info[x2+dx[dir2]][y2+dy[dir2]]!=-1)));else chk2=false;
+			if ((!chk1)||(!chk2)) {err=true;goto finish;}
+			
+			//处理移动 
+			memset(tr,0,sizeof(tr));
+			for (int i=0;i<10;i++) for (int j=0;j<10;j++) if (troop[i][j]>=0) tr[col[i][j]][i][j]=troop[i][j];
+			tr[1][x1][y1]-=w1;tr[1][x1+dx[dir1]][y1+dy[dir1]]+=w1;
+			tr[2][x2][y2]-=w2;tr[2][x2+dx[dir2]][y2+dy[dir2]]+=w2;
+			for (int i=0;i<10;i++) for (int j=0;j<10;j++)
+			{
+				fight(tr[1][i][j],tr[2][i][j],tr[0][i][j]);
+				troop[i][j]=tr[0][i][j]+tr[1][i][j]+tr[2][i][j];
+				if (tr[0][i][j]) col[i][j]=0;
+				else if (tr[1][i][j]) col[i][j]=1;
+				else if (tr[2][i][j]) col[i][j]=2;
+			}
+			
+			
+			//处理驻军增加
+			for (int i=0;i<10;i++)
+			for (int j=0;j<10;j++)
+			{
+				//旧规则 
+				/*if ((info[i][j]==0)&&(round%8==0)&&(col[i][j]!=0)) troop[i][j]++;
+				if ((info[i][j]==1)&&(round%2==0)&&(col[i][j]!=0)) troop[i][j]++;
+				if (info[i][j]==2) troop[i][j]++;*/
+				//新规则
+				if ((info[i][j]==0)&&(round%8==0)&&(col[i][j]!=0)) troop[i][j]++;
+				if ((info[i][j]==1)&&(col[i][j]!=0)) troop[i][j]++;
+				if (info[i][j]==2) troop[i][j]+=2;
+			}
+			
+			//判定下一步 
+			if (isLast)
+			{
+				if ((col[bgx1][bgy1]==2)||(col[bgx2][bgy2]==1)||(round==300))
+				{
+					for (int i=0;i<10;i++)
+					for (int j=0;j<10;j++)
+					{
+						output["display"]["count"][i*10+j]=max(troop[i][j],0);
+						output["display"]["type"][i*10+j]=info[i][j];
+						output["display"]["belong"][i*10+j]=col[i][j];
+					}
+					output["display"]["operation"][(ind)0][(ind)0]=x1;
+					output["display"]["operation"][(ind)0][(ind)1]=y1;
+					output["display"]["operation"][(ind)0][(ind)2]=w1;
+					output["display"]["operation"][(ind)0][(ind)3]=dir1;
+					output["display"]["operation"][(ind)1][(ind)0]=x2;
+					output["display"]["operation"][(ind)1][(ind)1]=y2;
+					output["display"]["operation"][(ind)1][(ind)2]=w2;
+					output["display"]["operation"][(ind)1][(ind)3]=dir2;
+					goto finish;
+				}
+				output["command"] = "request";
+				output["content"]["0"][(ind)0]=x2;output["content"]["0"][(ind)1]=y2;output["content"]["0"][(ind)2]=w2;output["content"]["0"][(ind)3]=dir2;
+				output["content"]["1"][(ind)0]=x1;output["content"]["1"][(ind)1]=y1;output["content"]["1"][(ind)2]=w1;output["content"]["1"][(ind)3]=dir1;
+				//处理display 
+				for (int i=0;i<10;i++)
+				for (int j=0;j<10;j++)
+				{
+					output["display"]["count"][i*10+j]=max(troop[i][j],0);
+					output["display"]["type"][i*10+j]=info[i][j];
+					output["display"]["belong"][i*10+j]=col[i][j];
+				}
+				output["display"]["status"]="combat";
+				output["display"]["operation"][(ind)0][(ind)0]=x1;
+				output["display"]["operation"][(ind)0][(ind)1]=y1;
+				output["display"]["operation"][(ind)0][(ind)2]=w1;
+				output["display"]["operation"][(ind)0][(ind)3]=dir1;
+				output["display"]["operation"][(ind)1][(ind)0]=x2;
+				output["display"]["operation"][(ind)1][(ind)1]=y2;
+				output["display"]["operation"][(ind)1][(ind)2]=w2;
+				output["display"]["operation"][(ind)1][(ind)3]=dir2;
+				break;
+			}
+			continue;
+				
+			//游戏结束
+			finish:
+			if ((!chk1)&&(!chk2)) 
+			{
+				output["display"]["status"]="end";
+				output["display"]["err"]="BOTH INVALID";
+				output["display"]["winner"]=0;
+				output["command"]="finish";
+				output["content"]["0"]=1;
+				output["content"]["1"]=1;
+				break;
+			}
+			else if (!chk1)
+			{
+				output["display"]["status"]="end";
+				output["display"]["err"]="PLAYER 1 INVALID";
+				output["display"]["winner"]=2;
+				output["command"]="finish";
+				output["content"]["0"]=0;
+				output["content"]["1"]=2;
+				break;
+			}
+			else if (!chk2)
+			{
+				output["display"]["status"]="end";
+				output["display"]["err"]="PLAYER 2 INVALID";
+				output["display"]["winner"]=1;
+				output["command"]="finish";
+				output["content"]["0"]=2;
+				output["content"]["1"]=0;
+				break;
+			}
+			else if ((col[bgx1][bgy1]==2)&&(col[bgx2][bgy2]==1))
+			{
+				output["display"]["status"]="finish";
+				output["display"]["err"]="BOTH KILL";
+				output["display"]["winner"]=0;
+				output["command"]="finish";
+				output["content"]["0"]=1;
+				output["content"]["1"]=1;
+				break;
+			}
+			else if (col[bgx1][bgy1]==2)
+			{
+				output["display"]["status"]="finish";
+				output["display"]["err"]="PLAYER 2 KILL";
+				output["display"]["winner"]=2;
+				output["command"]="finish";
+				output["content"]["0"]=0;
+				output["content"]["1"]=2;
+				break;
+			}
+			else if (col[bgx2][bgy2]==1)
+			{
+				output["display"]["status"]="finish";
+				output["display"]["err"]="PLAYER 1 KILL";
+				output["display"]["winner"]=1;
+				output["command"]="finish";
+				output["content"]["0"]=2;
+				output["content"]["1"]=0;
+				break;
+			}
+			else if (round==300)
+			{
+				int sum=0;
+				for (int i=0;i<10;i++)
+				for (int j=0;j<10;j++)
+					sum+=troop[i][j]*(col[i][j]==1)-troop[i][j]*(col[i][j]==2);
+				if (sum>0)
+				{
+					output["display"]["status"]="finish";
+					output["display"]["err"]="PLAYER 1 WIN";
+					output["display"]["winner"]=1;
+					output["command"]="finish";
+					output["content"]["0"]=2;
+					output["content"]["1"]=0;
+					break;
+				}
+				else if (sum<0)
+				{
+					output["display"]["status"]="finish";
+					output["display"]["err"]="PLAYER 2 WIN";
+					output["display"]["winner"]=2;
+					output["command"]="finish";
+					output["content"]["0"]=0;
+					output["content"]["1"]=2;
+					break;
+				}
+				else
+				{
+					output["display"]["status"]="finish";
+					output["display"]["err"]="DRAW";
+					output["display"]["winner"]=0;
+					output["command"]="finish";
+					output["content"]["0"]=1;
+					output["content"]["1"]=1;
+					break;
+				}
+			}
+			else assert(0);
+		}
+	}
+	Json::FastWriter writer;
+	cout<<writer.write(output)<<endl;
+}
