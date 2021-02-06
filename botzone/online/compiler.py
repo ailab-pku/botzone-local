@@ -91,7 +91,7 @@ config = dict(
     ),
     py36 = dict(
         suffix = 'py',
-        images = ['botzone/env-py36'],
+        images = ['botzone/env-full', 'botzone/env-py36'],
         time_limit = 6000,
         sub_time_limit = 4000,
         memory_limit = 256,
