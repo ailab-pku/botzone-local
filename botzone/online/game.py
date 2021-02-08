@@ -3,7 +3,9 @@ import json
 import os
 
 from botzone import Env
+from botzone.error import *
 from botzone.online import games
+from botzone.online.viewer.viewer import *
 from botzone.online.sandbox import SandBox
 
 class GameConfig:
@@ -112,9 +114,9 @@ class Game(Env):
         Parameters:
             config - GameConfig instance.
         '''
+        self.agents = None
         assert isinstance(config, GameConfig), 'Parameter config must be GameConfig instance!'
         self.config = config
-        self.pool = None
         self.sandbox = sandbox = SandBox(config.judge_path, config.extension)
         try:
             # create sandbox
@@ -128,6 +130,7 @@ class Game(Env):
         self.log = None
         self.requested_keep_running = False
         self.display = []
+        self.viewer = None
 
     @property
     def player_num(self):
@@ -154,6 +157,7 @@ class Game(Env):
         output = self.sandbox.run(input, self.config.keep_running)
         self.log = [output]
         self.display = []
+        if self.viewer: self.viewer.reset()
         
         # parse output from wrapper
         if output['keep_running']:
@@ -243,6 +247,13 @@ class Game(Env):
 
     def render(self, mode = 'ansi'):
         if mode == 'ansi':
-            print(self.display[-1])
+            if self.viewer is None:
+                self.viewer = TextViewer.make(self.config.name)
+                if self.viewer: self.viewer.reset()
+            if self.viewer:
+                self.viewer.render(self.display)
+                self.display = []
+            else:
+                print(self.display[-1])
         else:
             super(Game, self).render(mode)

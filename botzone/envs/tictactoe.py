@@ -23,7 +23,6 @@ class TicTacToeEnv(Env):
         self.agents = None
         self.round = None
         self.closed = False
-        pass
 
     @property
     def player_num(self):
