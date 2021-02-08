@@ -57,6 +57,7 @@ class SandBox:
     def copy(self, folder):
         assert os.path.isdir(folder)
         self._copy_to_container(folder, '/data')
+        self._prepare_userdata()
 
     def compile(self):
         if self.compiled: return
@@ -157,9 +158,14 @@ class SandBox:
         p = subprocess.run('docker cp %s %s:%s' % (src, self.container, dst), capture_output = True, shell = True, encoding = 'utf-8')
         if p.returncode != 0:
             raise RuntimeError('Failed to copy file %s to container %s! Detail:\n%s' % (src, self.container, p.stderr))
+    
+    def _prepare_userdata(self):
         p = subprocess.run('docker exec %s /bin/ln -s /data /home/user/data' % self.container, capture_output = True, shell = True, encoding = 'utf-8')
         if p.returncode != 0:
             raise RuntimeError('Failed to create symbolic link to /data in container %s! Detail:\n%s' % (self.container, p.stderr))
+        p = subprocess.run('docker exec %s /bin/chown -R user /data' % self.container, capture_output = True, shell = True, encoding = 'utf-8')
+        if p.returncode != 0:
+            raise RuntimeError('Failed to chown /data to user in container %s! Detail:\n%s' % (self.container, p.stderr))
         
     def _update_container(self, cpu, memory):
         p = subprocess.run('docker update --cpus="{cpu}" --memory="{memory}m" --memory-swap="{memory}m" {container}'.format(cpu = cpu, memory = memory, container = self.container), capture_output = True, shell = True, encoding = 'utf-8')
