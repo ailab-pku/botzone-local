@@ -21,4 +21,7 @@ class TextViewer(Viewer):
         elif name == 'Minesweeper':
             from botzone.online.viewer.minesweeper import MineSweeperViewer
             return MineSweeperTextViewer(*args, **kargs)
+        elif name == 'Gomoku':
+            from botzone.online.viewer.gomoku import GomokuTextViewer
+            return GomokuTextViewer(*args, **kargs)
         return None
