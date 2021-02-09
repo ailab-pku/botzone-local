@@ -7,7 +7,7 @@ from botzone.online.viewer.viewer import TextViewer
 
 class ReversiTextViewer(TextViewer):
     '''
-    Empty string in first or skipped round, {x, y, winner} in other rounds.
+    Empty string in first round, {x=-1, y=-1} in skipped round, {x, y, winner} in other rounds.
     '''
     
     def __init__(self):
@@ -31,6 +31,7 @@ class ReversiTextViewer(TextViewer):
             if 'x' in display:
                 x = display['x']
                 y = display['y']
+                if x == -1: continue
                 color = 2 - self.round % 2
                 b[x][y] = color
                 self.count[color] += 1
@@ -64,19 +65,19 @@ class ReversiTextViewer(TextViewer):
         if displays:
             d = displays[-1]
             if not d: d = {}
-            if not 'x' in d and self.round:
+            x = d.get('x', -1)
+            y = d.get('y', -1)
+            if x == -1 and self.round:
                 message += '\n%s skipped!' % self.stones[2 - self.round % 2]
             else:
-                x = d.get('x', -1)
-                y = d.get('y', -1)
                 styles[x][y] = style_cur
             if 'winner' in d:
                 message += '\n%s wins!' % self.stones[d['winner'] + 1]
             for x, y in change: styles[x][y] = style_change
         t = Table.grid(padding = (0, 1))
-        t.add_row('', *map(str, range(1, 9)))
+        t.add_row('', *map(chr, range(65, 65 + 8)))
         for j in range(8):
-            t.add_row(chr(65 + j), *[styles[i][j](self.stones[b[i][j]]) for i in range(8)])
+            t.add_row(str(1 + j), *[styles[i][j](self.stones[b[i][j]]) for i in range(8)])
         tt = Table.grid(padding = (0, 4))
         tt.add_row(t, message)
         print(Panel.fit(tt, box = box.SQUARE))
