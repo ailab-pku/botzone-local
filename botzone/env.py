@@ -121,7 +121,7 @@ class Env(object):
             seed - Seed specified.
         '''
         if seed is not None: assert isinstance(seed, int) and seed >= 0, 'Seed must be a non-negative integer or omitted'
-        self.seed = seed
+        self._seed = seed
 
     def __enter__(self):
         '''Support with-statement for the environment.'''

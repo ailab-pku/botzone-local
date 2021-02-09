@@ -40,6 +40,7 @@ class MineSweeperEnv(Env):
         self.round = None
         self.closed = False
         self.initdata = {}
+        self._seed = None
         self.display = []
         self.viewer = None
     
@@ -68,7 +69,7 @@ class MineSweeperEnv(Env):
         if not 10 < self.minecount <= 100:
             self.minecount = 80
         self.initdata = dict(width = self.width, height = self.height, minecount = self.minecount)
-        if self.seed: random.seed(self.seed)
+        if self._seed: random.seed(self._seed)
         mines = [(x, y) for x in range(self.height) for y in range(self.width)]
         random.shuffle(mines)
         mines = mines[ : self.minecount]
