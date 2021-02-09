@@ -33,7 +33,7 @@ class ReversiEnv(Env):
     def player_num(self):
         return 2
     
-    def reset(self):
+    def reset(self, initdata = None):
         if self.closed:
             raise AlreadyClosed()
         if self.agents is None:

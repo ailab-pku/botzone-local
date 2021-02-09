@@ -157,7 +157,6 @@ class Game(Env):
         output = self.sandbox.run(input, self.config.keep_running)
         self.log = [output]
         self.display = []
-        if self.viewer: self.viewer.reset()
         
         # parse output from wrapper
         if output['keep_running']:
@@ -190,6 +189,8 @@ class Game(Env):
             self.initdata = response['initdata']
         else:
             self.initdata = initdata
+            
+        if self.viewer: self.viewer.reset(self.initdata)
 
     def step(self):
         if self.sandbox is None:
@@ -249,7 +250,7 @@ class Game(Env):
         if mode == 'ansi':
             if self.viewer is None:
                 self.viewer = TextViewer.make(self.config.name)
-                if self.viewer: self.viewer.reset()
+                if self.viewer: self.viewer.reset(self.initdata)
             if self.viewer:
                 self.viewer.render(self.display)
                 self.display = []

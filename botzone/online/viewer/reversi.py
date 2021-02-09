@@ -1,5 +1,4 @@
 from rich import box, print
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -12,10 +11,9 @@ class ReversiTextViewer(TextViewer):
     '''
     
     def __init__(self):
-        self.console = Console()
         self.stones = ' ●○'
     
-    def reset(self):
+    def reset(self, initdata = None):
         self.board = b = [[0 for j in range(8)] for i in range(8)]
         self.round = -1
         self.count = [0, 2, 2]
