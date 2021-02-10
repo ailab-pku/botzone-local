@@ -35,8 +35,19 @@ class BotConfig:
             userfile_path - Local folder to store userfile used by this bot.
             Default folder is `bot/{user_id}/` relative to this file.
         '''
-        # Download config
-        bot = BotzoneAPI.get_bot(ver_id)
+        if path is None:
+            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot')
+        else:
+            assert os.path.isdir(path)
+        # Download config if no cache
+        config_path = os.path.join(path, ver_id + '.conf')
+        if os.path.exists(config_path):
+            with open(config_path) as f:
+                bot = json.load(f)
+        else:
+            bot = BotzoneAPI.get_bot(ver_id)
+            with open(config_path, 'w') as f:
+                json.dump(bot, f)
         ver = bot['ver']
         if userfile and not userfile_path:
             userfile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot', bot['user']['_id'])
@@ -46,10 +57,6 @@ class BotConfig:
         simpleio = bot['simpleio']
         keep_running = bot['enable_keep_running']
         # Download bot if no cache
-        if path is None:
-            path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot')
-        else:
-            assert os.path.isdir(path)
         path = os.path.join(path, ver_id + '.' + extension)
         if force_download or not os.path.exists(path):
             while not BotzoneAPI.download_bot(bot['_id'], ver, path):
