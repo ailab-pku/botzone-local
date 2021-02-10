@@ -12,6 +12,7 @@ class MineSweeperEnv(Env):
             "width": Number of [11, 80], default 30
             "height": Number of [11, 40], default 20
             "minecount": Number of [11, 100], default 80
+            "seed": random seed
         }
         
         Request: {
@@ -68,6 +69,8 @@ class MineSweeperEnv(Env):
         self.minecount = int(initdata.get('minecount', 80))
         if not 10 < self.minecount <= 100:
             self.minecount = 80
+        if 'seed' in initdata:
+            self.seed(initdata['seed'])
         self.initdata = dict(width = self.width, height = self.height, minecount = self.minecount)
         if self._seed: random.seed(self._seed)
         mines = [(x, y) for x in range(self.height) for y in range(self.width)]
