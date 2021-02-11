@@ -1,3 +1,4 @@
+from copy import deepcopy
 import execjs
 import json
 import os
@@ -201,7 +202,8 @@ class Game(Env):
         # run each agent
         responses = {}
         for i, request in self.log[-1]['output']['content'].items():
-            response = self.agents[int(i)].step(request)
+            # deepcopy for safety
+            response = deepcopy(self.agents[int(i)].step(deepcopy(request)))
             responses[i] = dict(verdict = 'OK' if response is not None else 'ERR', response = response)
         self.log.append(responses)
 
