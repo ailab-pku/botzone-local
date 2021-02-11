@@ -102,7 +102,7 @@ class GomokuEnv(Env):
             self.viewer.render(self.display)
             self.display = []
         else:
-            super(ReversiEnv, self).render(mode)
+            super(GomokuEnv, self).render(mode)
     
     def close(self):
         self.closed = True

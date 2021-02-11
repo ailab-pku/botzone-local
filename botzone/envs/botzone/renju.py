@@ -111,7 +111,7 @@ class RenjuEnv(Env):
             self.viewer.render(self.display)
             self.display = []
         else:
-            super(ReversiEnv, self).render(mode)
+            super(RenjuEnv, self).render(mode)
     
     def close(self):
         self.closed = True
