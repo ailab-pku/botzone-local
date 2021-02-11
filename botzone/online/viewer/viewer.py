@@ -19,7 +19,7 @@ class TextViewer(Viewer):
             from botzone.online.viewer.reversi import ReversiTextViewer
             return ReversiTextViewer(*args, **kargs)
         elif name == 'Minesweeper':
-            from botzone.online.viewer.minesweeper import MineSweeperViewer
+            from botzone.online.viewer.minesweeper import MineSweeperTextViewer
             return MineSweeperTextViewer(*args, **kargs)
         elif name == 'Gomoku':
             from botzone.online.viewer.gomoku import GomokuTextViewer
@@ -27,4 +27,7 @@ class TextViewer(Viewer):
         elif name == 'Renju':
             from botzone.online.viewer.renju import RenjuTextViewer
             return RenjuTextViewer(*args, **kargs)
+        elif name == 'FightTheLandlord':
+            from botzone.online.viewer.fightthelandlord import FightTheLandlordTextViewer
+            return FightTheLandlordTextViewer(*args, **kargs)
         return None
