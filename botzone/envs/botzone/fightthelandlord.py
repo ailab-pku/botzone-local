@@ -133,13 +133,18 @@ class FightTheLandlordEnv(Env):
                 self.hand[cur] = list(set(self.hand[cur]) - set(action))
                 # check beat
                 if self.to_beat:
-                    if t[0] != self.to_beat[0]:
-                        if not(t[0] == 'rocket' or t[0] == 'bomb' and self.to_beat[0] != 'rocket'):
+                    if t[0] == 'rocket':
+                        pass
+                    elif t[0] == 'bomb':
+                        if self.to_beat[0] == 'rocket' or self.to_beat[0] == 'bomb' and t[2] <= self.to_beat[2]:
+                            raise Error('LESS_COMPARE')
+                    else:
+                        if t[0] != self.to_beat[0]:
                             raise Error('MISMATCH_CARDTYPE')
-                    if t[1] != self.to_beat[1]:
-                        raise Error('MISMATCH_CARDLENGTH')
-                    if t[2] <= self.to_beat[2]:
-                        raise Error('LESS_COMPARE')
+                        if t[1] != self.to_beat[1]:
+                            raise Error('MISMATCH_CARDLENGTH')
+                        if t[2] <= self.to_beat[2]:
+                            raise Error('LESS_COMPARE')
                 self.to_beat = t
             self.score[cur] += self.score_type[t[0]]
             self.history.pop(0)
