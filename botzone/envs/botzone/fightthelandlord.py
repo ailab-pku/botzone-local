@@ -153,18 +153,21 @@ class FightTheLandlordEnv(Env):
             if not self.hand[cur]:
                 score = [0, 2, 2] if cur else [2, 0, 0]
                 for i in range(3): score[i] += self.score[i] / 100
+                score[1] = score[2] = (score[1] + score[2]) / 2
                 self.display.append({
                     '0': score[0], '1': score[1], '2': score[2],
                     'event': {'player': cur, 'action': action}
                 })
-                return score
+                self.round = None
+                return tuple(score)
         except Error as e:
-            score = [2.5, -1, -1] if cur else [-1, 2.5, 2.5]
+            score = (2.5, -1, -1) if cur else (-1, 2.5, 2.5)
             self.display.append({
                 '0': score[0], '1': score[1], '2': score[2],
                 'event': {'player': cur, 'action': []},
                 'errorInfo': e.args[0]
             })
+            self.round = None
             return score
         self.display.append({'event': {'player': cur, 'action': action}})
     
