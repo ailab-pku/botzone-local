@@ -30,4 +30,7 @@ class TextViewer(Viewer):
         elif name == 'FightTheLandlord':
             from botzone.online.viewer.fightthelandlord import FightTheLandlordTextViewer
             return FightTheLandlordTextViewer(*args, **kargs)
+        elif name == 'Snake':
+            from botzone.online.viewer.snake import SnakeTextViewer
+            return SnakeTextViewer(*args, **kargs)
         return None
