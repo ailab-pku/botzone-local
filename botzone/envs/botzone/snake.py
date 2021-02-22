@@ -169,3 +169,6 @@ class SnakeEnv(Env):
             self.display = []
         else:
             super(SnakeEnv, self).render(mode)
+    
+    def close(self):
+        self.closed = True

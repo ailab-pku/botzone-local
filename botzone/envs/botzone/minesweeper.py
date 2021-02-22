@@ -152,5 +152,8 @@ class MineSweeperEnv(Env):
         else:
             super(MineSweeperEnv, self).render(mode)
     
+    def close(self):
+        self.closed = True
+    
     def _in_board(self, x, y):
         return 0 <= x < self.height and 0 <= y < self.width

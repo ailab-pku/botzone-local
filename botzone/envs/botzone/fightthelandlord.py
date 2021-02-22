@@ -181,6 +181,9 @@ class FightTheLandlordEnv(Env):
         else:
             super(FightTheLandlordEnv, self).render(mode)
     
+    def close(self):
+        self.closed = True
+    
     def _check_poker_type(self, cards):
         # check validity
         if not isinstance(cards, list): raise Error('INVALID_INPUT')
