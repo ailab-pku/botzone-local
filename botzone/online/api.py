@@ -68,7 +68,6 @@ class BotzoneAPI:
             raise RuntimeError('Failed to connect to botzone.org!')
         if not r.ok:
             raise RuntimeError('Failed to connect to botzone.org, Reason: ' + r.reason)
-        print(r.url)
         if r.url == 'https://botzone.org.cn/?msg=notlogin':
             # allowing caller to request login
             return False
