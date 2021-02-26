@@ -19,26 +19,30 @@ class BotConfig:
     def fromID(cls, ver_id, path = None, force_download = False
         , userfile = False, userfile_path = None):
         '''
-        Download bot config and (optionally) code from botzone. If no code cache
-        is found, you may be asked to login to an account accessible to code of
-        the bot.
+        Download bot config and (optionally) code & userfile from botzone. If no
+        code & userfile cache is found, you may be asked to login to an account
+        accessible to code & userfile.
         
         Parameters:
             ver_id - Bot ID copied from botzone
             path - Target folder to download code. Default folder is `bot/`
             relative to this file.
-            force_download - If set to False, cached code (if exists) in target
-            folder will be used. Default is False.
-            userfile - Whether the bot uses userfile in `/data`. If set to True,
-            you must prepare userfile yourself since botzone currently does not
-            support downloading other users' files.
-            userfile_path - Local folder to store userfile used by this bot.
-            Default folder is `bot/{user_id}/` relative to this file.
+            force_download - If set to False, cached code & userfile (if exists)
+            in target folder will be used. Default is False.
+            userfile - Whether the bot uses userfile in `/data`. Default is
+            False.
+            userfile_path - Target folder to download userfile. Default folder
+            is `bot/({user_id}/)` relative to this file.
         '''
         if path is None:
             path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot')
         else:
             assert os.path.isdir(path)
+        if userfile:
+            if userfile_path is None:
+                userfile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot')
+            else:
+                assert os.path.isdir(userfile_path)
         # Download config if no cache
         config_path = os.path.join(path, ver_id + '.conf')
         if os.path.exists(config_path):
@@ -49,8 +53,7 @@ class BotConfig:
             with open(config_path, 'w') as f:
                 json.dump(bot, f)
         ver = bot['ver']
-        if userfile and not userfile_path:
-            userfile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bot', bot['user']['_id'])
+        user_id = bot['user']['_id']
         bot = bot['bot']
         game = GameConfig.fromID(bot['game'])
         extension = bot['extension']
@@ -65,10 +68,18 @@ class BotConfig:
                 if input() != 'y':
                     raise RuntimeError('User canceled login')
                 while not BotzoneAPI.login():
-                    pass
-        # Check userfile available
+                    print('Log in failed, try again.')
+        # Download userfile if no cache
         if userfile:
-            assert os.path.exists(userfile_path), 'Currently botzone does not support downloading userfile of other users, please prepare them in %s first' % userfile_path
+            if force_download or not os.path.exists(os.path.join(userfile_path, user_id)):
+                while not BotzoneAPI.download_userfile(user_id, userfile_path):
+                    # not login, ask user
+                    print('You need to login to download userfile, type y to login')
+                    if input() != 'y':
+                        raise RuntimeError('User canceled login')
+                    while not BotzoneAPI.login():
+                        print('Log in failed, try again.')
+            userfile_path = os.path.join(userfile_path, user_id)
         return cls(game, path, extension, simpleio = simpleio, keep_running = keep_running, userfile_path = userfile_path if userfile else None)
 
     def __init__(self, game, path, extension, simpleio = False, keep_running = False, userfile_path = None):

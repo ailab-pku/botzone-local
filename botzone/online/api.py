@@ -1,5 +1,7 @@
 import getpass
+import os
 import requests
+import zipfile
 
 class BotzoneAPI:
     '''
@@ -58,3 +60,33 @@ class BotzoneAPI:
             # allowing caller to request login
             return False
         raise RuntimeError('Failed to download bot, Reason: ' + d['message'])
+    
+    def download_userfile(user_id, path):
+        try:
+            r = requests.get('https://botzone.org.cn/downloaduserfiles/?uid=%s' % user_id, cookies = BotzoneAPI.cookies, stream = True)
+        except:
+            raise RuntimeError('Failed to connect to botzone.org!')
+        if not r.ok:
+            raise RuntimeError('Failed to connect to botzone.org, Reason: ' + r.reason)
+        print(r.url)
+        if r.url == 'https://botzone.org.cn/?msg=notlogin':
+            # allowing caller to request login
+            return False
+        target = os.path.join(path, 'tmp.zip')
+        print('Downloading...')
+        cnt = 0
+        with open(target, mode = 'wb') as f:
+            for chunk in r.iter_content(chunk_size = 4096):
+                f.write(chunk)
+                cnt += len(chunk)
+                print(cnt, 'bytes downloaded', end = '\r')
+        print()
+        if not zipfile.is_zipfile(target):
+            os.remove(target)
+            raise RuntimeError('Failed to download userfile, Reason: ' + r.json()['message'])
+        with zipfile.ZipFile(target) as f:
+            for item in f.namelist():
+                print('Extracting', item)
+                f.extract(item, path)
+        os.remove(target)
+        return True
