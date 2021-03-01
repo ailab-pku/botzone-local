@@ -39,4 +39,7 @@ class TextViewer(Viewer):
         elif name == 'Amazons':
             from botzone.online.viewer.amazons import AmazonsTextViewer
             return AmazonsTextViewer(*args, **kargs)
+        elif name == 'Go':
+            from botzone.online.viewer.go import GoTextViewer
+            return GoTextViewer(*args, **kargs)
         return None
