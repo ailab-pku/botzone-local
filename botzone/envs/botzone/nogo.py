@@ -62,7 +62,7 @@ class NoGoEnv(Env):
         try:
             x = int(action['x']) + 1
             y = int(action['y']) + 1
-            assert self._in_board(x, y)
+            assert self._in_board(x, y) and self.board[x][y] == 0
         except:
             # Invalid action
             self.round = None
