@@ -12,7 +12,7 @@ def testInterface():
     try:
         from botzone.online.game import GameConfig, Game
         env_wrap = Game(GameConfig.fromName('TicTacToe')) # cpp17
-        from botzone.envs.tictactoe import TicTacToeEnv
+        from botzone.envs.botzone.tictactoe import TicTacToeEnv
         env_impl = TicTacToeEnv()
 
         from botzone.online.bot import BotConfig, Bot
@@ -51,7 +51,7 @@ def testBot():
         bots.append(Bot(BotConfig.fromID('5ff9599638843939e74766cb'))) # cs
         bots.append(Bot(BotConfig.fromID('5ff96b0d38843939e7477556'))) # pas
 
-        from botzone.envs.tictactoe import TicTacToeEnv
+        from botzone.envs.botzone.tictactoe import TicTacToeEnv
         env = TicTacToeEnv()
         from botzone.agents.tictactoe import TicTacToeAgent
         bot_impl = TicTacToeAgent()
