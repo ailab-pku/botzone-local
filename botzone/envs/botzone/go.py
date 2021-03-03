@@ -69,7 +69,7 @@ class GoEnv(Env):
         try:
             x = int(action['x'])
             y = int(action['y'])
-            assert x == y == -1 or self._in_board(x, y)
+            assert x == y == -1 or self._in_board(x, y) and self.board[x][y] == 0
         except:
             # Invalid action
             self.round = None
