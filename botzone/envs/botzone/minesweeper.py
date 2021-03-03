@@ -134,12 +134,11 @@ class MineSweeperEnv(Env):
                             self.reveal[nx][ny] = True
         self.cellleft -= len(self.status)
         self.round += 1
-        print(self.cellleft, self.mineleft)
         # check episode ends
         if self.cellleft == self.mineleft:
             self.round = None
             self.display.append(dict(msg = 'FINISH', status = self.status))
-            return self.mineleft / self.minecount * 100
+            return (self.mineleft / self.minecount * 100, )
         self.display.append(dict(status = self.status))
     
     def render(self, mode = 'ansi'):
