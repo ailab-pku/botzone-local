@@ -58,7 +58,7 @@ class GomokuEnv(Env):
         try:
             x = action['x']
             y = action['y']
-            assert self._in_board(x, y)
+            assert self._in_board(x, y) and self.board[x][y] == 0
         except:
             # Invalid action
             self.round = None
@@ -84,9 +84,11 @@ class GomokuEnv(Env):
                 nx -= dx
                 ny -= dy
             if cnt >= 5:
+                self.round = None
                 self.display.append(dict(color = cur_player, x = x, y = y, winner = cur_player))
                 return (0, 2) if cur_player else (2, 0)
         if self.round == 15 * 15:
+            self.round = None
             self.display.append(dict(color = cur_player, x = x, y = y, winner = 'none'))
             return (1, 1)
         self.display.append(dict(color = cur_player, x = x, y = y))
