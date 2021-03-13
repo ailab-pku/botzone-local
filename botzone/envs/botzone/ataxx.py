@@ -15,7 +15,7 @@ class AtaxxEnv(Env):
             (1) When one player has no position to move. All empty positions are
             considered to be the opponent's. The player with more stones on the
             board wins.
-            (2) When the game exceeds 400 rounds. The player with more stones on
+            (2) When the game exceeds `limit=400` rounds. The player with more stones on
             the board wins.
         Score:
             2 for winner and 0 for loser.
@@ -23,13 +23,14 @@ class AtaxxEnv(Env):
     
     metadata = {'render.modes': ['ansi']}
     
-    def __init__(self):
+    def __init__(self, limit = 400):
         # Initialize configurations, possible viewers and state
         self.agents = None
         self.round = None
         self.closed = False
         self.display = []
         self.viewer = None
+        self.limit = limit
     
     @property
     def player_num(self):
@@ -95,7 +96,7 @@ class AtaxxEnv(Env):
             self.display.append(dict(x0 = x0, y0 = y0, x1 = x1, y1 = y1, winner = winner))
             self.round = None
             return ((2, 0), (0, 2))[winner]
-        if self.round > 400:
+        if self.round > self.limit:
             winner = cur_player
             if sum(x.count(3 - color) for x in self.board) > sum(x.count(color) for x in self.board):
                 winner = 1 - winner
