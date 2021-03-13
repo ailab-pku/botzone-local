@@ -6,7 +6,7 @@ from botzone.online.viewer.amazons import AmazonsTextViewer
 class AmazonsEnv(Env):
     '''
     Description:
-        Traditional Amazons game with 8*8 board.
+        Traditional Amazons game with `size`*`size` board. (default = 8)
         
         Decision order: In each turn only one player decide.
         Request: {x0, y0, x1, y1, x2, y2} for each player, -1 for all for the
@@ -21,13 +21,14 @@ class AmazonsEnv(Env):
     
     metadata = {'render.modes': ['ansi']}
     
-    def __init__(self):
+    def __init__(self, size = 8):
         # Initialize configurations, possible viewers and state
         self.agents = None
         self.round = None
         self.closed = False
         self.display = []
         self.viewer = None
+        self.size = size
     
     @property
     def player_num(self):
@@ -43,9 +44,10 @@ class AmazonsEnv(Env):
             agent.reset()
         # Initialize state for new episode
         self.round = 0
-        self.board = b = [[0 for j in range(8)] for i in range(8)]
-        b[0][2] = b[2][0] = b[5][0] = b[7][2] = 1 # 1 for black
-        b[0][5] = b[2][7] = b[5][7] = b[7][5] = 2 # 2 for white
+        self.board = b = [[0 for j in range(self.size)] for i in range(self.size)]
+        p = (self.size + 2) / 3
+        b[0][p - 1] = b[p - 1][0] = b[-p][0] = b[-1][p - 1] = 1 # 1 for black
+        b[0][-p] = b[p - 1][-1] = b[-p][-1] = b[-1][-p] = 2 # 2 for white
         self.last_action = {
             'x0' : -1, 'y0' : -1
             , 'x1' : -1, 'y1' : -1
@@ -111,7 +113,7 @@ class AmazonsEnv(Env):
     def render(self, mode = 'ansi'):
         if mode == 'ansi':
             if self.viewer is None:
-                self.viewer = AmazonsTextViewer()
+                self.viewer = AmazonsTextViewer(size = self.size)
                 self.viewer.reset()
             self.viewer.render(self.display)
             self.display = []
@@ -128,8 +130,8 @@ class AmazonsEnv(Env):
     def _valid_move(self):
         valid = [[], []]
         b = self.board
-        for x0 in range(8):
-            for y0 in range(8):
+        for x0 in range(self.size):
+            for y0 in range(self.size):
                 if b[x0][y0] > 0:
                     for dx1 in range(-1, 2):
                         for dy1 in range(-1, 2):
@@ -151,4 +153,4 @@ class AmazonsEnv(Env):
         return valid
     
     def _in_board(self, x, y):
-        return 0 <= x < 8 and 0 <= y < 8
+        return 0 <= x < self.size and 0 <= y < self.size

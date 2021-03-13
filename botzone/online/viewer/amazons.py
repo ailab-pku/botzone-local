@@ -11,14 +11,16 @@ class AmazonsTextViewer(TextViewer):
     {blackCount, whiteCount[,x0, y0, x1, y1, x2, y2][, winner, err]} in other rounds.
     '''
     
-    def __init__(self):
+    def __init__(self, size = 8):
         self.stones = ' ●○●'
+        self.size = size
     
     def reset(self, initdata = None):
-        self.board = b = [[0 for j in range(8)] for i in range(8)]
+        self.board = b = [[0 for j in range(self.size)] for i in range(self.size)]
         self.round = -1
-        b[0][2] = b[2][0] = b[5][0] = b[7][2] = 1 # 1 for black
-        b[0][5] = b[2][7] = b[5][7] = b[7][5] = 2 # 2 for white
+        p = (self.size + 2) // 3
+        b[0][p - 1] = b[p - 1][0] = b[-p][0] = b[-1][p - 1] = 1 # 1 for black
+        b[0][-p] = b[p - 1][-1] = b[-p][-1] = b[-1][-p] = 2 # 2 for white
         self.count = [0, 0]
     
     def render(self, displays, bootstrap = True):
@@ -48,7 +50,7 @@ class AmazonsTextViewer(TextViewer):
             self.count[1],
             self.stones[1 + self.round % 2]
         )
-        styles = [[self.stones[b[i][j]] if b[i][j] >= 0 else Text(self.stones[b[i][j]], style = 'blue') for j in range(8)] for i in range(8)]
+        styles = [[self.stones[b[i][j]] if b[i][j] >= 0 else Text(self.stones[b[i][j]], style = 'blue') for j in range(self.size)] for i in range(self.size)]
         if displays:
             d = displays[-1]
             if not d: d = {}
@@ -67,9 +69,9 @@ class AmazonsTextViewer(TextViewer):
             if 'winner' in d:
                 message += '\n%s wins!' % self.stones[d['winner'] + 1]
         t = Table.grid(padding = (0, 1))
-        t.add_row('', *map(chr, range(65, 65 + 8)))
-        for j in range(8):
-            t.add_row(str(1 + j), *[styles[i][j] for i in range(8)])
+        t.add_row('', *map(chr, range(65, 65 + self.size)))
+        for j in range(self.size):
+            t.add_row(str(1 + j), *[styles[i][j] for i in range(self.size)])
         tt = Table.grid(padding = (0, 4))
         tt.add_row(t, message)
         print(Panel.fit(tt, box = box.SQUARE))
