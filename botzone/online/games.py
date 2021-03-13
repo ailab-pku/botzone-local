@@ -247,7 +247,7 @@ _games = [
         }
     ),
     dict(
-        name = "Chinese-Standard-Mahjong",
+        name = "ChineseStandardMahjong",
         title = "国标麻将·复式",
         player = 4,
         extension = "elfbin",
@@ -282,8 +282,11 @@ _id2name = {
 '5c9ef6ac9f425613e1da0765' : 'Tank2S',
 '5d7f30ecbdd782060f8d3234' : 'TicTacToe',
 '5daacfa8fc925f63c8301972' : 'Kingz',
-'5e37dcf74019f43051e53201' : 'Chinese-Standard-Mahjong',
+'5e37dcf74019f43051e53201' : 'ChineseStandardMahjong',
 }
+
+def all():
+    return _games
 
 def get_by_name(name):
     '''

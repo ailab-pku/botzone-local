@@ -67,7 +67,7 @@ def testGame():
     samples = {
         'Amazons': '5bd136e00681335cc1f4d000',
         'Ataxx': '58d8c01327d1065e145ee3f7',
-        'Chinese-Standard-Mahjong': '5e918db24a3d0c0568f34083',
+        'ChineseStandardMahjong': '5e918db24a3d0c0568f34083',
         'FightTheLandlord': '5af06df6a5858d0880e515f2',
         'Go': '5b00f35d765c7d10b6600016',
         'Gomoku': '543b462e71a5d5647363cbb0',
@@ -105,7 +105,7 @@ def testMahjong():
     SandBox.CONFIG_TIME_RATIO = 3
     try:
         from botzone.online.game import GameConfig, Game
-        env = Game(GameConfig.fromName('Chinese-Standard-Mahjong'))
+        env = Game(GameConfig.fromName('ChineseStandardMahjong'))
         from botzone.online.bot import BotConfig, Bot
         bots = [Bot(BotConfig.fromID(id, userfile = True)) for id in top4]
         runMatch(env, bots)
