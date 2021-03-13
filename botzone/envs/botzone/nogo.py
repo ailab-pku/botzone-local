@@ -6,7 +6,7 @@ from botzone.online.viewer.nogo import NoGoTextViewer
 class NoGoEnv(Env):
     '''
     Description:
-        Traditional NoGo with 9*9 board.
+        Traditional NoGo with `size`*`size` board. (default = 9)
         
         Decision order: In each turn only one player decide.
         Request: {"x": Number, "y": Number} for each player, {"x": -1, "y": -1}
@@ -21,13 +21,14 @@ class NoGoEnv(Env):
     
     metadata = {'render.modes': ['ansi']}
     
-    def __init__(self):
+    def __init__(self, size = 9):
         # Initialize configurations, possible viewers and state
         self.agents = None
         self.round = None
         self.closed = False
         self.display = []
         self.viewer = None
+        self.size = size
     
     @property
     def player_num(self):
@@ -43,8 +44,8 @@ class NoGoEnv(Env):
             agent.reset()
         # Initialize state for new episode
         self.round = 0
-        self.board = b = [[0 for i in range(11)] for j in range(11)]
-        for i in range(11):
+        self.board = b = [[0 for i in range(self.size + 2)] for j in range(self.size + 2)]
+        for i in range(self.size + 2):
             b[i][0] = b[i][-1] = b[0][i] = b[-1][i] = -1
         self.last_action = {'x' : -1, 'y' : -1}
         self.display = ['']
@@ -84,13 +85,13 @@ class NoGoEnv(Env):
         self.display.append({'color' : cur_player, 'x' : x - 1, 'y' : y - 1})
     
     def _in_board(self, x, y):
-        return 0 < x <= 9 and 0 < y <= 9
+        return 0 < x <= self.size and 0 < y <= self.size
     
     def _count_liberty(self, x, y):
         color = self.board[x][y]
         group = set()
         liberty = 0
-        visited = [[0 for i in range(11)] for j in range(11)]
+        visited = [[0 for i in range(self.size + 2)] for j in range(self.size + 2)]
         q = [(x, y)]
         visited[x][y] = 1
         while q:
@@ -129,8 +130,8 @@ class NoGoEnv(Env):
         return True
     
     def _has_valid_move(self, color):
-        for i in range(1, 10):
-            for j in range(1, 10):
+        for i in range(1, self.size + 1):
+            for j in range(1, self.size + 1):
                 if self.board[i][j] == 0:
                     # try it
                     self.board[i][j] = color
@@ -143,7 +144,7 @@ class NoGoEnv(Env):
     def render(self, mode = 'ansi'):
         if mode == 'ansi':
             if self.viewer is None:
-                self.viewer = NoGoTextViewer()
+                self.viewer = NoGoTextViewer(size = self.size)
                 self.viewer.reset()
             self.viewer.render(self.display)
             self.display = []
