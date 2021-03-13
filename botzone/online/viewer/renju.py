@@ -11,11 +11,12 @@ class RenjuTextViewer(TextViewer):
     {color, x, y, winner=0/1/none} in final round.
     '''
     
-    def __init__(self):
+    def __init__(self, size = 15):
         self.stones = ' ●○'
+        self.size = size
     
     def reset(self, initdata = None):
-        self.board = [[0 for j in range(15)] for i in range(15)]
+        self.board = [[0 for j in range(self.size)] for i in range(self.size)]
         self.round = -1
     
     def render(self, displays, bootstrap = True):
@@ -27,8 +28,8 @@ class RenjuTextViewer(TextViewer):
             if not display: continue
             if display.get('msg', None) == 'exchange':
                 # exchange
-                for i in range(15):
-                    for j in range(15):
+                for i in range(self.size):
+                    for j in range(self.size):
                         if self.board[i][j]:
                             self.board[i][j] = 3 - self.board[i][j]
             if 'x' not in display: continue
@@ -52,9 +53,9 @@ class RenjuTextViewer(TextViewer):
         else:
             message += '\nNext: %s' % self.stones[self.round % 2 + 1]
         t = Table.grid(padding = (0, 1))
-        t.add_row('', *map(chr, range(65, 65 + 15)))
-        for j in range(15):
-            t.add_row(str(1 + j), *[Text(self.stones[b[i][j]], style = 'red') if i == x and j == y else self.stones[b[i][j]] for i in range(15)])
+        t.add_row('', *map(chr, range(65, 65 + self.size)))
+        for j in range(self.size):
+            t.add_row(str(1 + j), *[Text(self.stones[b[i][j]], style = 'red') if i == x and j == y else self.stones[b[i][j]] for i in range(self.size)])
         tt = Table.grid(padding = (0, 4))
         tt.add_row(t, message)
         print(Panel.fit(tt, box = box.SQUARE))

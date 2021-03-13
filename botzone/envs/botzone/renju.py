@@ -4,7 +4,7 @@ from botzone.online.viewer.renju import RenjuTextViewer
 class RenjuEnv(Env):
     '''
     Description:
-        Freestyle gomoku, with exchange after 3rd move.
+        Freestyle gomoku, with exchange after 3rd move, with board `size`*`size`. (default = 15)
         
         Decision order: In each turn only one player decide.
         Request: {"x": Number, "y": Number} for each player, {"x": -1, "y": -1}
@@ -20,13 +20,14 @@ class RenjuEnv(Env):
     
     metadata = {'render.modes': ['ansi']}
     
-    def __init__(self):
+    def __init__(self, size = 15):
         # Initialize configurations, possible viewers and state
         self.agents = None
         self.round = None
         self.closed = False
         self.display = []
         self.viewer = None
+        self.size = size
     
     @property
     def player_num(self):
@@ -42,7 +43,7 @@ class RenjuEnv(Env):
             agent.reset()
         # Initialize state for new episode
         self.round = 0
-        self.board = b = [[0 for i in range(15)] for j in range(15)]
+        self.board = b = [[0 for i in range(self.size)] for j in range(self.size)]
         self.last_action = {'x' : -1, 'y' : -1}
         self.display = [None]
         if self.viewer: self.viewer.reset()
@@ -70,8 +71,8 @@ class RenjuEnv(Env):
         self.last_action = action
         if x == y == -1:
             # exchange
-            for i in range(15):
-                for j in range(15):
+            for i in range(self.size):
+                for j in range(self.size):
                     if self.board[i][j]:
                         self.board[i][j] = 3 - self.board[i][j]
             self.display.append({'msg' : 'exchange'})
@@ -96,14 +97,14 @@ class RenjuEnv(Env):
                     self.round = None
                     self.display.append(dict(color = cur_player, x = x, y = y, winner = cur_player))
                     return (0, 2) if cur_player else (2, 0)
-            if self.round == 15 * 15:
+            if self.round == self.size * self.size:
                 self.round = None
                 self.display.append(dict(color = cur_player, x = x, y = y, winner = 'none'))
                 return (1, 1)
             self.display.append(dict(color = cur_player, x = x, y = y))
     
     def _in_board(self, x, y):
-        return 0 <= x < 15 and 0 <= y < 15
+        return 0 <= x < self.size and 0 <= y < self.size
     
     def render(self, mode = 'ansi'):
         if mode == 'ansi':
