@@ -93,8 +93,8 @@ class SandBox:
         p.stdin.write(b'\n>>>BOTZONE_CONTROLLER_INPUT_END<<<\n')
         try:
             p.stdin.flush()
-        except OSError:
-            # when p exits before flush, an OSError is triggered on windows
+        except (OSError, BrokenPipeError):
+            # when p exits before flush, an Error is triggered on windows
             print('Warning: Broken pipe when flushing stdin in run')
         output = p.stdout.readline()
         output = json.loads(output)
@@ -116,8 +116,8 @@ class SandBox:
         p.stdin.write(b'>>>BOTZONE_CONTROLLER_KILL<<<\n')
         try:
             p.stdin.flush()
-        except OSError:
-            # when p exits before flush, an OSError is triggered on windows
+        except (OSError, BrokenPipeError):
+            # when p exits before flush, an Error is triggered on windows
             print('Warning: Broken pipe when flushing stdin in run_kill')
         # wait for it die gracefully
         try:
