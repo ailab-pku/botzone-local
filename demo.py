@@ -10,10 +10,9 @@ def runMatch(env, bots):
 
 def testInterface():
     try:
-        from botzone.online.game import GameConfig, Game
-        env_wrap = Game(GameConfig.fromName('TicTacToe')) # cpp17
-        from botzone.envs.botzone.tictactoe import TicTacToeEnv
-        env_impl = TicTacToeEnv()
+        import botzone
+        env_wrap = botzone.make('TicTacToe-wrap')
+        env_impl = botzone.make('TicTacToe-v0')
 
         from botzone.online.bot import BotConfig, Bot
         bot_cpp = Bot(BotConfig.fromID('6017e6b10b59850f61c42b0a')) # cpp17+json+keep_running
@@ -51,8 +50,8 @@ def testBot():
         bots.append(Bot(BotConfig.fromID('5ff9599638843939e74766cb'))) # cs
         bots.append(Bot(BotConfig.fromID('5ff96b0d38843939e7477556'))) # pas
 
-        from botzone.envs.botzone.tictactoe import TicTacToeEnv
-        env = TicTacToeEnv()
+        import botzone
+        env = botzone.make('TicTacToe-v0')
         from botzone.agents.tictactoe import TicTacToeAgent
         bot_impl = TicTacToeAgent()
 
@@ -86,12 +85,34 @@ def testGame():
         'Tetris2': '59f860eb5a11ed72c933561e',
         'TicTacToe': '5ff9514438843939e7476086'
     }
-    from botzone.online.game import GameConfig, Game
+    envs = {
+        'Amazons': 'Amazons-v8',
+        'Ataxx': 'Ataxx-v0',
+        'ChineseStandardMahjong': 'ChineseStandardMahjong-v0-dup',
+        'FightTheLandlord': 'FightTheLandlord-v0',
+        'Go': 'Go-v8',
+        'Gomoku': 'Gomoku-v15',
+        'Kingz': 'Kingz-wrap',
+        'Minesweeper': 'Minesweeper-v0',
+        'NoGo': 'NoGo-v9',
+        'Pacman': 'Pacman-wrap',
+        'Pacman2': 'Pacman2-wrap',
+        'Renju': 'Renju-v15',
+        'Reversi': 'Reversi-v0',
+        'Snake': 'Snake-v0',
+        'Tank': 'Tank-wrap',
+        'Tank2': 'Tank2-wrap',
+        'Tank2S': 'Tank2S-wrap',
+        'Tetris': 'Tetris-wrap',
+        'Tetris2': 'Tetris2-wrap',
+        'TicTacToe': 'TicTacToe-v0'
+    }
+    import botzone
     from botzone.online.bot import BotConfig, Bot
     for game in sorted(samples.keys()):
         print('Trying game', game)
         try:
-            env = Game(GameConfig.fromName(game))
+            env = botzone.make(envs[game])
             bots = [Bot(BotConfig.fromID(samples[game])) for i in range(env.player_num)]
             runMatch(env, bots)
         finally:
@@ -104,8 +125,8 @@ def testMahjong():
     from botzone.online.sandbox import SandBox
     SandBox.CONFIG_TIME_RATIO = 3
     try:
-        from botzone.online.game import GameConfig, Game
-        env = Game(GameConfig.fromName('ChineseStandardMahjong'))
+        import botzone
+        env = botzone.make('ChineseStandardMahjong-v0-dup')
         from botzone.online.bot import BotConfig, Bot
         bots = [Bot(BotConfig.fromID(id, userfile = True)) for id in top4]
         runMatch(env, bots)
