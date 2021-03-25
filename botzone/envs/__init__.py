@@ -80,3 +80,15 @@ register(
     id = 'TicTacToe-v0',
     entry_point = 'botzone.envs.botzone.tictactoe:TicTacToeEnv'
 )
+
+register(
+    id = 'ChineseStandardMahjong-v0-dup',
+    entry_point = 'botzone.envs.botzone.chinesestandardmahjong:ChineseStandardMahjongEnv',
+    duplicate = True
+)
+
+register(
+    id = 'ChineseStandardMahjong-v0',
+    entry_point = 'botzone.envs.botzone.chinesestandardmahjong:ChineseStandardMahjongEnv',
+    duplicate = False
+)

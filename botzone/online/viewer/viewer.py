@@ -48,4 +48,7 @@ class TextViewer(Viewer):
         elif name == 'TicTacToe':
             from botzone.online.viewer.tictactoe import TicTacToeTextViewer
             return TicTacToeTextViewer(*args, **kargs)
+        elif name == 'ChineseStandardMahjong':
+            from botzone.online.viewer.chinesestandardmahjong import ChineseStandardMahjongTextViewer
+            return ChineseStandardMahjongTextViewer(*args, **kargs)
         return None
