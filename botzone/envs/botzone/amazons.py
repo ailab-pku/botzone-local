@@ -45,7 +45,7 @@ class AmazonsEnv(Env):
         # Initialize state for new episode
         self.round = 0
         self.board = b = [[0 for j in range(self.size)] for i in range(self.size)]
-        p = (self.size + 2) / 3
+        p = (self.size + 2) // 3
         b[0][p - 1] = b[p - 1][0] = b[-p][0] = b[-1][p - 1] = 1 # 1 for black
         b[0][-p] = b[p - 1][-1] = b[-p][-1] = b[-1][-p] = 2 # 2 for white
         self.last_action = {
