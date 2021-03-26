@@ -93,7 +93,7 @@ def testGame():
         'Go': 'Go-v8',
         'Gomoku': 'Gomoku-v15',
         'Kingz': 'Kingz-wrap',
-        'Minesweeper': 'Minesweeper-v0',
+        'Minesweeper': 'MineSweeper-v0',
         'NoGo': 'NoGo-v9',
         'Pacman': 'Pacman-wrap',
         'Pacman2': 'Pacman2-wrap',
