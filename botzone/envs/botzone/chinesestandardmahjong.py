@@ -8,7 +8,7 @@ from botzone.online.viewer.chinesestandardmahjong import ChineseStandardMahjongT
 try:
     from MahjongGB import MahjongFanCalculator
 except:
-    print('MahjongGB library required! Please visit https://github.com/ailab-pku/Chinese-Standard-Mahjong/fan-calculator-usage for more information.')
+    print('MahjongGB library required! Please visit https://github.com/ailab-pku/PyMahjongGB for more information.')
     raise
 
 class ChineseStandardMahjongEnv(Env):
