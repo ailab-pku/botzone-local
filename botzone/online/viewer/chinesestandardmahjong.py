@@ -54,8 +54,7 @@ class ChineseStandardMahjongTextViewer(TextViewer):
         for i in range(4): draw['H%d' % (i + 1)] = r('\n%s \n' % '春夏秋冬'[i])
         for i in range(4): draw['H%d' % (i + 5)] = b('\n%s \n' % '梅蘭竹菊'[i])
         for i in range(9): draw['W%d' % (i + 1)] = b('一二三四五六七八九'[i]) + r('\n\n 萬')
-        # Workaround of bug in Rich
-        draw['back'] = Text(' \n \n ', style = 'on green')
+        draw['back'] = Text('   \n   \n   ', style = 'on green')
         self.draw = draw
         self.wind = ['East', 'South', 'West', 'North']
     
