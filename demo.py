@@ -92,7 +92,7 @@ def testGame():
         'FightTheLandlord': 'FightTheLandlord-v0',
         'Go': 'Go-v8',
         'Gomoku': 'Gomoku-v15',
-        'Kingz': 'Kingz-wrap',
+        'Kingz': 'Kingz-v0',
         'Minesweeper': 'MineSweeper-v0',
         'NoGo': 'NoGo-v9',
         'Pacman': 'Pacman-wrap',

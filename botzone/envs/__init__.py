@@ -92,3 +92,9 @@ register(
     entry_point = 'botzone.envs.botzone.chinesestandardmahjong:ChineseStandardMahjongEnv',
     duplicate = False
 )
+
+register(
+    id = 'Kingz-v0',
+    entry_point = 'botzone.envs.botzone.kingz:KingzEnv',
+    limit = 300
+)
