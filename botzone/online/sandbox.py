@@ -155,7 +155,7 @@ class SandBox:
         print('Container %s created successfully' % self.container)
 
     def _copy_to_container(self, src, dst):
-        p = subprocess.run('docker cp %s %s:%s' % (src, self.container, dst), capture_output = True, shell = True, encoding = 'utf-8')
+        p = subprocess.run('docker cp “%s” “%s:%s”' % (src, self.container, dst), capture_output = True, shell = True, encoding = 'utf-8')
         if p.returncode != 0:
             raise RuntimeError('Failed to copy file %s to container %s! Detail:\n%s' % (src, self.container, p.stderr))
     
