@@ -32,7 +32,7 @@ class FightTheLandlordEnv(Env):
     
     metadata = {'render.modes': ['ansi']}
     
-    def __init__(self):
+    def __init__(self, small = True):
         # Initialize configurations, possible viewers and state
         self.agents = None
         self.round = None
@@ -41,6 +41,7 @@ class FightTheLandlordEnv(Env):
         self._seed = None
         self.display = []
         self.viewer = None
+        self.small = small
         
         self.score_type = {
             'pass' : 0,
@@ -152,7 +153,8 @@ class FightTheLandlordEnv(Env):
             # check episode ends
             if not self.hand[cur]:
                 score = [0, 2, 2] if cur else [2, 0, 0]
-                for i in range(3): score[i] += self.score[i] / 100
+                if self.small:
+                    for i in range(3): score[i] += self.score[i] / 100
                 score[1] = score[2] = (score[1] + score[2]) / 2
                 self.display.append({
                     '0': score[0], '1': score[1], '2': score[2],

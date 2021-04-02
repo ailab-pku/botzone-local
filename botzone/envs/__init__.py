@@ -23,7 +23,13 @@ register(
 )
 register(
     id = 'FightTheLandlord-v0',
-    entry_point = 'botzone.envs.botzone.fightthelandlord:FightTheLandlordEnv'
+    entry_point = 'botzone.envs.botzone.fightthelandlord:FightTheLandlordEnv',
+    small = True
+)
+register(
+    id = 'FightTheLandlord-v1',
+    entry_point = 'botzone.envs.botzone.fightthelandlord:FightTheLandlordEnv',
+    small = False
 )
 register(
     id = 'Go-v8',
