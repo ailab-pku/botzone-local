@@ -89,7 +89,7 @@ from botzone.envs.botzone.ataxx import AtaxxEnv
 env = AtaxxEnv()
 ```
 
-所有沙盒包装的游戏环境均采用GameName-wrap的ID形式，当前本库支持的完整环境列表可以用```botzone.all()```获取。
+所有沙盒包装的游戏环境均采用GameName-wrap的ID形式，当前本库支持的完整环境列表可以用```botzone.all()```获取，[这里](https://github.com/ailab-pku/botzone-local/tree/master/botzone/envs)提供了对各环境的简单描述。
 
 ### 自定义环境和智能体
 
