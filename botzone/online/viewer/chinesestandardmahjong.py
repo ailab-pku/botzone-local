@@ -87,7 +87,7 @@ class ChineseStandardMahjongTextViewer(TextViewer):
                 self.flowers[self.player].append(tile)
             elif display['action'] == 'DRAW':
                 self.tileCnt = display['tileCnt']
-                if self.tile: self.discards[self.player].append(self.tile)
+                if self.tile and not self.msg.startswith('BUGANG'): self.discards[self.player].append(self.tile)
                 self.player = display['player']
                 self.tile = display['tile']
                 self.msg = 'DRAW ' + self.tile
@@ -143,7 +143,6 @@ class ChineseStandardMahjongTextViewer(TextViewer):
                 self.hands[player].remove(tile)
                 self.packs[player].insert(self.packs[player].index(tile), tile)
                 self.msg = 'BUGANG ' + tile
-                self.tile = None
             elif display['action'] == 'HU':
                 self.player = display['player']
                 self.fan = display['fan']
