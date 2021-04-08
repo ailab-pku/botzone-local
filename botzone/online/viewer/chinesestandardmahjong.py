@@ -125,7 +125,7 @@ class ChineseStandardMahjongTextViewer(TextViewer):
                 self.tileCnt = display['tileCnt']
                 player = display['player']
                 tile = display['tile']
-                self.hands[self.player].append(self.tile)
+                self.hands[player].append(self.tile)
                 for i in range(4): self.hands[player].remove(tile)
                 if player == self.player:
                     # in secret
