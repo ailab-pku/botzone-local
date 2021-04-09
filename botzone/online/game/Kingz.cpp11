@@ -180,13 +180,13 @@ int main()
 			bool chk2=opt2[(ind)0].isInt()&&opt2[(ind)1].isInt()&&opt2[(ind)2].isInt()&&opt2[(ind)3].isInt();
 			if ((!chk1)||(!chk2)) {err=true;goto finish;}
 			x1=opt1[(ind)0].asInt(),y1=opt1[(ind)1].asInt(),w1=opt1[(ind)2].asInt(),dir1=opt1[(ind)3].asInt();
-			if ((x1>=0)&&(x1<10)&&(y1>=0)&&(y1<10)&&(dir1>=0)&&(dir1<=4));else chk1=false; 
+			if ((x1>=0)&&(x1<10)&&(y1>=0)&&(y1<10)&&(dir1>=0)&&(dir1<=4)&&(w1>0));else chk1=false; 
 			if ((chk1)&&((col[x1][y1]==1)&&(troop[x1][y1]>w1)&&(x1+dx[dir1]<10)&&(x1+dx[dir1]>=0)
 				&&(y1+dy[dir1]<10)&&(y1+dy[dir1]>=0)&&(info[x1+dx[dir1]][y1+dy[dir1]]!=-1)));else chk1=false;
 			
 				
 			x2=opt2[(ind)0].asInt(),y2=opt2[(ind)1].asInt(),w2=opt2[(ind)2].asInt(),dir2=opt2[(ind)3].asInt();
-			if ((x2>=0)&&(x2<10)&&(y2>=0)&&(y2<10)&&(dir2>=0)&&(dir2<=4));else chk2=false;
+			if ((x2>=0)&&(x2<10)&&(y2>=0)&&(y2<10)&&(dir2>=0)&&(dir2<=4)&&(w2>0));else chk2=false;
 			if ((chk2)&&((col[x2][y2]==2)&&(troop[x2][y2]>w2)&&(x2+dx[dir2]<10)&&(x2+dx[dir2]>=0)
 				&&(y2+dy[dir2]<10)&&(y2+dy[dir2]>=0)&&(info[x2+dx[dir2]][y2+dy[dir2]]!=-1)));else chk2=false;
 			if ((!chk1)||(!chk2)) {err=true;goto finish;}
