@@ -54,4 +54,7 @@ class TextViewer(Viewer):
         elif name == 'Kingz':
             from botzone.online.viewer.kingz import KingzTextViewer
             return KingzTextViewer(*args, **kargs)
+        elif name == 'FightTheLandlord2':
+            from botzone.online.viewer.fightthelandlord2 import FightTheLandlord2TextViewer
+            return FightTheLandlord2TextViewer(*args, **kargs)
         return None

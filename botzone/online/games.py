@@ -247,6 +247,19 @@ _games = [
         }
     ),
     dict(
+        name = "FightTheLandlord2",
+        title = "斗地主·改",
+        player = 3,
+        extension = "py36",
+        keep_running = False,
+        transform_code = {
+            "supported": False,
+            "request_from_json": '',
+            "response_to_json": '',
+            "response_from_json": '',
+        }
+    ),
+    dict(
         name = "ChineseStandardMahjong",
         title = "国标麻将·复式",
         player = 4,
@@ -282,7 +295,8 @@ _id2name = {
 '5c9ef6ac9f425613e1da0765' : 'Tank2S',
 '5d7f30ecbdd782060f8d3234' : 'TicTacToe',
 '5daacfa8fc925f63c8301972' : 'Kingz',
-'5e37dcf74019f43051e53201' : 'ChineseStandardMahjong',
+'5e36c89c4019f43051e45589' : 'FightTheLandlord2',
+'5e37dcf74019f43051e53201' : 'ChineseStandardMahjong'
 }
 
 def all():
